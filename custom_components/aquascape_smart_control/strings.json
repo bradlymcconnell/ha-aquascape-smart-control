@@ -1,0 +1,22 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect to Aquascape Smart Control",
+        "description": "Enter your 32-character Aquascape / Blynk Auth Token from https://smartcontrol.aquascapeinc.com/dashboard/login (under Devices -> Device Info -> BLYNK_AUTH_TOKEN).",
+        "data": {
+          "auth_token": "Aquascape Auth Token (32 characters)",
+          "device_name": "Device Name"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Failed to connect to the Aquascape Smart Control cloud API.",
+      "invalid_auth": "Invalid Auth Token. Make sure you entered the 32-character BLYNK_AUTH_TOKEN from the web console, not the hyphenated Device UID.",
+      "unknown": "Unexpected error occurred."
+    },
+    "abort": {
+      "already_configured": "This Aquascape device is already configured."
+    }
+  }
+}

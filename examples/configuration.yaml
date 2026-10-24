@@ -1,0 +1,30 @@
+# Example standalone REST configuration for Home Assistant (configuration.yaml)
+# Replace YOUR_32_CHAR_AQUASCAPE_TOKEN with the 32-character BLYNK_AUTH_TOKEN
+# from https://smartcontrol.aquascapeinc.com/dashboard/login
+
+rest:
+  - resource: "https://smartcontrol.aquascapeinc.com/external/api/get?token=YOUR_32_CHAR_AQUASCAPE_TOKEN&v11&v30&v31"
+    scan_interval: 60
+    timeout: 15
+    sensor:
+      - name: "On Golden Pond Temperature"
+        unique_id: aquascape_pond_water_temperature
+        value_template: "{{ value_json.v11 | float | round(1) }}"
+        device_class: temperature
+        state_class: measurement
+        unit_of_measurement: "°F"
+        icon: mdi:water-thermometer
+      - name: "On Golden Pond Thermometer Wi-Fi Signal"
+        unique_id: aquascape_pond_thermometer_rssi
+        value_template: "{{ value_json.v30 | float | round(0) }}"
+        device_class: signal_strength
+        state_class: measurement
+        unit_of_measurement: "dBm"
+  - resource: "https://smartcontrol.aquascapeinc.com/external/api/isHardwareConnected?token=YOUR_32_CHAR_AQUASCAPE_TOKEN"
+    scan_interval: 60
+    timeout: 15
+    binary_sensor:
+      - name: "On Golden Pond Thermometer Online"
+        unique_id: aquascape_pond_thermometer_online
+        value_template: "{{ value == 'true' }}"
+        device_class: connectivity

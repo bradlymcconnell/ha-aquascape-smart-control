@@ -1,0 +1,11 @@
+{
+  "domain": "aquascape_smart_control",
+  "name": "Aquascape Smart Control",
+  "codeowners": ["@bradlymcconnell"],
+  "config_flow": true,
+  "documentation": "https://github.com/bradlymcconnell/ha-aquascape-smart-control",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/bradlymcconnell/ha-aquascape-smart-control/issues",
+  "requirements": [],
+  "version": "1.0.0"
+}

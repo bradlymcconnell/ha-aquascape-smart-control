@@ -1,0 +1,158 @@
+blueprint:
+  name: "Aquascape Pond Winter Care & Temperature Threshold Alerts"
+  description: >
+    Monitors your pond water temperature (e.g., via an Aquascape Smart Pond
+    Thermometer) and triggers seasonal fish-care alerts when the water cools
+    below key thresholds:
+
+    1. **Reduce Feeding Threshold** (default: below **60°F** for 30 minutes) —
+       Switch to cold-water wheat-germ diet and reduce feeding frequency as
+       fish metabolism slows.
+    2. **Stop Feeding / Cold Watch Threshold** (default: below **55°F** for 15 minutes) —
+       Stop feeding completely to prevent undigested food in the digestive tract
+       during winter torpor, and monitor for approaching freeze conditions.
+  domain: automation
+  author: bradlymcconnell
+  source_url: https://github.com/bradlymcconnell/ha-aquascape-smart-control/blob/main/blueprints/automation/aquascape/pond_temperature_winter_care.yaml
+  input:
+    temperature_sensor:
+      name: Pond Water Temperature Sensor
+      description: Select your pond water temperature sensor (e.g., sensor.on_golden_pond_temperature).
+      selector:
+        entity:
+          filter:
+            - domain: sensor
+              device_class: temperature
+    pond_name:
+      name: Pond Name
+      description: Friendly name of your pond used in notification titles and messages.
+      default: "On Golden Pond"
+      selector:
+        text:
+    reduce_feeding_temp:
+      name: Reduce Feeding Temperature Threshold (°F)
+      description: Alert when water temperature stays below this threshold (default 60°F).
+      default: 60
+      selector:
+        number:
+          min: 40
+          max: 75
+          step: 1
+          unit_of_measurement: "°F"
+          mode: slider
+    reduce_feeding_duration:
+      name: Reduce Feeding Hold Duration (Minutes)
+      description: How many minutes the temperature must remain below the threshold before triggering.
+      default: 30
+      selector:
+        number:
+          min: 1
+          max: 180
+          step: 5
+          unit_of_measurement: "minutes"
+          mode: box
+    stop_feeding_temp:
+      name: Stop Feeding / Cold Watch Temperature Threshold (°F)
+      description: Alert when water temperature drops below this critical threshold (default 55°F).
+      default: 55
+      selector:
+        number:
+          min: 32
+          max: 65
+          step: 1
+          unit_of_measurement: "°F"
+          mode: slider
+    stop_feeding_duration:
+      name: Stop Feeding Hold Duration (Minutes)
+      description: How many minutes the temperature must remain below the stop-feeding threshold before triggering.
+      default: 15
+      selector:
+        number:
+          min: 1
+          max: 180
+          step: 5
+          unit_of_measurement: "minutes"
+          mode: box
+    enable_persistent_notification:
+      name: Create Home Assistant Persistent Notification
+      description: Show a persistent notification banner in the Home Assistant UI when a threshold is crossed.
+      default: true
+      selector:
+        boolean:
+    reduce_feeding_actions:
+      name: Additional Actions on Reduce Feeding (< 60°F)
+      description: Optional extra actions (e.g., send a mobile app push notification, adjust fish feeder schedule).
+      default: []
+      selector:
+        action:
+    stop_feeding_actions:
+      name: Additional Actions on Stop Feeding (< 55°F)
+      description: Optional extra actions (e.g., send a critical mobile alert, turn off automatic fish feeder).
+      default: []
+      selector:
+        action:
+
+mode: single
+max_exceeded: silent
+
+variables:
+  pond_name_var: !input pond_name
+  temp_sensor_var: !input temperature_sensor
+  reduce_temp_var: !input reduce_feeding_temp
+  stop_temp_var: !input stop_feeding_temp
+  persistent_notify_var: !input enable_persistent_notification
+
+trigger:
+  - platform: numeric_state
+    entity_id: !input temperature_sensor
+    below: !input reduce_feeding_temp
+    for:
+      minutes: !input reduce_feeding_duration
+    id: reduce_feeding
+  - platform: numeric_state
+    entity_id: !input temperature_sensor
+    below: !input stop_feeding_temp
+    for:
+      minutes: !input stop_feeding_duration
+    id: stop_feeding
+
+condition: []
+
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: reduce_feeding
+        sequence:
+          - if:
+              - condition: template
+                value_template: "{{ persistent_notify_var }}"
+            then:
+              - action: persistent_notification.create
+                data:
+                  notification_id: "aquascape_pond_below_{{ reduce_temp_var }}"
+                  title: "{{ pond_name_var }}: Water Below {{ reduce_temp_var }}°F (Reduce Feeding)"
+                  message: >
+                    {{ pond_name_var }} water temperature is now {{ states(temp_sensor_var) }}°F
+                    (below {{ reduce_temp_var }}°F). Fish metabolism is slowing down—reduce
+                    feeding frequency and use easily digestible cold-water food.
+          - choose: []
+            default: !input reduce_feeding_actions
+
+      - conditions:
+          - condition: trigger
+            id: stop_feeding
+        sequence:
+          - if:
+              - condition: template
+                value_template: "{{ persistent_notify_var }}"
+            then:
+              - action: persistent_notification.create
+                data:
+                  notification_id: "aquascape_pond_below_{{ stop_temp_var }}"
+                  title: "{{ pond_name_var }}: Water Below {{ stop_temp_var }}°F (Stop Feeding)"
+                  message: >
+                    {{ pond_name_var }} water temperature has dropped to {{ states(temp_sensor_var) }}°F
+                    (below {{ stop_temp_var }}°F). Stop feeding fish and monitor for cold weather snaps.
+          - choose: []
+            default: !input stop_feeding_actions

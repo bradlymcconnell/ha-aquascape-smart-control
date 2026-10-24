@@ -1,0 +1,40 @@
+# Example standalone Pond Winter Care automations (automations.yaml)
+- id: on_golden_pond_below_60_reduce_feeding
+  alias: "On Golden Pond: Water Below 60°F (Reduce Feeding)"
+  description: "Alert when On Golden Pond water temperature stays below 60°F for 30 minutes (switch to cold-water diet / reduce feeding)."
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.on_golden_pond_temperature
+      below: 60
+      for:
+        minutes: 30
+  condition: []
+  action:
+    - action: persistent_notification.create
+      data:
+        notification_id: on_golden_pond_below_60
+        title: "On Golden Pond: Water Below 60°F"
+        message: >-
+          Pond water temperature is now {{ states('sensor.on_golden_pond_temperature') }}°F (below 60°F).
+          Fish metabolism is slowing down—reduce feeding frequency and use easily digestible cold-water food.
+  mode: single
+
+- id: on_golden_pond_below_55_stop_feeding
+  alias: "On Golden Pond: Water Below 55°F (Stop Feeding / Cold Watch)"
+  description: "Alert when On Golden Pond water temperature drops below 55°F for 15 minutes (stop feeding fish and monitor for cold snaps)."
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.on_golden_pond_temperature
+      below: 55
+      for:
+        minutes: 15
+  condition: []
+  action:
+    - action: persistent_notification.create
+      data:
+        notification_id: on_golden_pond_below_55
+        title: "On Golden Pond: Water Below 55°F — Stop Feeding"
+        message: >-
+          Pond water temperature has dropped to {{ states('sensor.on_golden_pond_temperature') }}°F (below 55°F).
+          Stop feeding fish and monitor for cold weather snaps.
+  mode: single
