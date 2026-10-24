@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Connect to Aquascape Smart Control",
-        "description": "Enter your 32-character Aquascape / Blynk Auth Token from https://smartcontrol.aquascapeinc.com/dashboard/login (under Devices -> Device Info -> BLYNK_AUTH_TOKEN).",
+        "description": "Enter your 32-character Aquascape / Blynk Auth Token from {console_url} (under Devices -> Device Info -> BLYNK_AUTH_TOKEN).",
         "data": {
           "auth_token": "Aquascape Auth Token (32 characters)",
           "device_name": "Device Name"

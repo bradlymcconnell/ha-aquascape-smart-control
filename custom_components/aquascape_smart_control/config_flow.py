@@ -113,7 +113,12 @@ class AquascapeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         )
 
         return self.async_show_form(
-            step_id="user", data_schema=schema, errors=errors
+            step_id="user",
+            data_schema=schema,
+            errors=errors,
+            description_placeholders={
+                "console_url": "https://smartcontrol.aquascapeinc.com/dashboard/login"
+            },
         )
 
 
